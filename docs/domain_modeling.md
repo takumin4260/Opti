@@ -157,7 +157,7 @@ type Product = {
   price: number; // 概算価格
   
   // 設置難易度 (MVP要件: 設置難易度を考慮)
-  installationDifficulty: 'easy' | 'medium' | 'hard';
+  installationDifficulty: 'low' | 'medium' | 'high';
 
   // 購入導線
   purchaseLink: string;
