@@ -8,17 +8,36 @@ MVP.mdの要件に基づき、NoSQL (Document DB想定) とDDDを意識した初
 erDiagram
     UserAccount ||--|| UserContext : "has (1:1)"
     UserAccount ||--o{ SimulationScenario : "creates (1:N)"
+    UserAccount ||--o{ AdoptionPlan : "owns (1:N)"
     UserContext ||--o{ SimulationScenario : "source of snapshot (1:N)"
     SimulationScenario ||--o{ OptimizationPlan : "generates (1:N)"
+    OptimizationPlan ||--o{ AdoptionPlan : "source of (1:N)"
+
+    UserAccount {
+        string id
+        string email
+    }
+    UserContext {
+        string id
+        string userId
+        ResidenceInfo residence
+    }
+    SimulationScenario {
+        string id
+        string userId
+        BudgetConstraint budget
+        ResidenceInfo residenceSnapshot
+    }
     OptimizationPlan {
         string id
         string simulationScenarioId
-        ProposedItem[] items
+        ProposalGroup[] proposalGroups
     }
     AdoptionPlan {
         string id
+        string userId
         string sourcePlanId
-        AdoptedItem[] items
+        AdoptedItem[] adoptedItems
     }
 ```
 

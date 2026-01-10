@@ -28,6 +28,10 @@ proto/
 │       └── v1/
 │           ├── diagnosis.proto
 │           └── service.proto
+│   └── adoption/
+│       └── v1/
+│           ├── adoption.proto
+│           └── service.proto
 └── buf.yaml                        # ワークスペース設定
 ```
 
@@ -75,6 +79,18 @@ proto/
 - `SimulationScenario`: 診断コンテキスト（UserContextのスナップショットを含む）。
 - `OptimizationPlan`: 提案グループ (`ProposalGroup`) を持つ最終成果物。
 - `ProposedItem`: `product_id` と `quantity`, `reason` のみを持つ軽量な参照ポインタ。
+
+### 4.4 Adoption Service (`opti.adoption.v1`)
+追跡・実行コンテキスト。ユーザーが決めた「やることリスト」の進捗を管理します。
+
+**RPCs**:
+- `CreateAdoptionPlan(CreateAdoptionPlanRequest) returns (AdoptionPlan)`: 提案から採用プランを作成
+- `GetAdoptionPlan(GetAdoptionPlanRequest) returns (AdoptionPlan)`
+- `UpdateItemStatus(UpdateItemStatusRequest) returns (AdoptionPlan)`: アイテムの購入状態更新（未購入→購入済み等）
+
+**Messages**:
+- `AdoptionPlan`: 導入プロジェクトの進捗管理。
+- `AdoptedItem`: 購入ステータス (`buy_status`) を持つアイテム。
 
 ## 5. スタイルガイド
 - **フィールド名**: `snake_case` (Protobuf標準)。

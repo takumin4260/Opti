@@ -11,15 +11,48 @@ Optiのバックエンドシステムは、**Go言語** で実装された **マ
 - **データベース**: NoSQL (Firestore)
 - **DI (依存性の注入)**: [Google Wire](https://github.com/google/wire)
 
-## 3. ディレクトリ構成 (Standard Go Layout + Clean Arch)
+## 3. マイクロサービス構成 (Service Boundaries)
 
-今回は以下の3つのマイクロサービスとして構成します。
+`docs/api_design.md` の定義に基づき、以下の4つのマイクロサービスに分割します。
 
-1.  **`user-service`**: ユーザー勘定・コンテキスト管理
-2.  **`catalog-service`**: 製品カタログ管理（Read Heavy）
-3.  **`diagnosis-service`**: 診断ロジック・プラン生成
+| Service Directory | Service Name | 担当領域 (Context) | API Definition |
+| :--- | :--- | :--- | :--- |
+| `services/user` | **User Service** | 認証 (Auth), ユーザー属性, 住環境 (User Context) | `AuthService`, `UserService` |
+| `services/catalog` | **Catalog Service** | 製品データベース管理 (Product Context) | `ProductService` |
+| `services/simulation` | **Simulation Service** | 診断ロジック, 提案生成 (Recommendation Context) | `SimulationService` |
+| `services/project` | **Project Service** | 採用プラン, 進捗管理 (Execution Context) | `ProjectService` |
 
-各サービスディレクトリ（`backend/user-service` 等）の内部構造は共通です：
+---
+
+## 4. ディレクトリ構成 (Monorepo Layout)
+
+プロジェクトルート直下に `services/` ディレクトリを配置し、各サービスを格納します。
+
+```text
+Opti/
+├── gen/                      # 自動生成コード (Protobuf -> Go/TS)
+├── proto/                    # Protobuf定義ファイル (.proto)
+│
+├── services/                 # マイクロサービス群
+│   ├── user/                 # [User Service]
+│   │   ├── cmd/server/       # Entrypoint
+│   │   ├── internal/         # Clean Architecture (Domain, Usecase...)
+│   │   └── go.mod
+│   │
+│   ├── catalog/              # [Catalog Service]
+│   │   └── ...
+│   │
+│   ├── simulation/           # [Simulation Service]
+│   │   └── ...
+│   │
+│   └── project/              # [Project Service]
+│       └── ...
+│
+└── go.work                   # Go Workspace (複数モジュール管理)
+```
+
+### 各サービスの内部構成 (Standard Go Layout + Clean Arch)
+各サービス内部 (`services/xxx/`) は、共通して以下の構造を持ちます。
 
 ```text
 service-name/
@@ -27,16 +60,12 @@ service-name/
 │   └── server/
 │       └── main.go           # エントリーポイント。依存関係を解決しサーバーを起動。
 ├── internal/
-│   ├── domain/               # [Inner Layer] 後述。
-│   │   ├── model/            # エンティティ、値オブジェクト (Value Objects)。
-│   │   └── repository/       # リポジトリのインターフェース定義。
+│   ├── domain/               # [Inner Layer]
+│   │   ├── model/            # エンティティ定義 (DDD)
+│   │   └── repository/       # Repositoryインターフェース
 │   ├── usecase/              # [Application Layer]
-│   │   └── <feature>/        # ビジネスロジックフローの実装。
-│   ├── interface/            # [Adapter Layer]
-│   │   ├── grpc/             # gRPCハンドラ (Connectインターフェースの実装)。
-│   │   └── gateway/          # DB実装 (Firestoreクライアント) や外部APIクライアント。
-│   └── infrastructure/       # [Framework/Driver Layer]
-│       └── db/               # DB接続設定、コンフィグ読み込み等。
+│   ├── interface/            # [Adapter Layer] (gRPC Handlers, DB Gateway)
+│   └── infrastructure/       # [Framework Layer] (DB Config, Logger)
 └── go.mod
 ```
 

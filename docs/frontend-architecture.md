@@ -15,20 +15,34 @@
 
 ```text
 frontend/
-├── app/                      # App Routerのページとレイアウト
-│   ├── (public)/             # 公開ルート
-│   └── (dashboard)/          # 認証が必要なルート
+├── app/                      # App Router (BFF Layer for Data Fetching)
+│   ├── (public)/             # LP, ログインなど
+│   └── (dashboard)/          # Dashboard, 診断結果など (Private)
+│
 ├── components/
-│   ├── ui/                   # 再利用可能なAtomicコンポーネント (Button, Input)
-│   ├── features/             # ビジネスロジックを含む機能単位コンポーネント (DiagnosisForm)
-│   └── layout/               # グローバルレイアウト (Header, Sidebar)
+│   ├── ui/                   # 汎用UIコンポーネント (Button, Card, Dialogなど)
+│   ├── features/             # 機能単位のコンポーネント (Container/Presentational)
+│   │   ├── diagnosis/
+│   │   │   ├── DiagnosisWizard.tsx
+│   │   │   └── ...
+│   │   ├── catalog/
+│   │   └── dashboard/
+│   └── layout/               # ヘッダー, サイドバー, ラッパー
+│
 ├── lib/
-│   ├── client/               # Connectクライアントの初期化
-│   └── utils/                # ユーティリティ関数
+│   ├── rpc/                  # gRPC Client Factory
+│   │   ├── server.ts         # [Server Side] Server Components/Actions用クライアント生成
+│   │   └── client.ts         # [Client Side] Browser用クライアント生成
+│   ├── actions/              # [Server Actions] BFF Mutation & Orchestration
+│   │   ├── diagnosis.ts      # 例: ストリーミング診断実行, プラン保存
+│   │   └── catalog.ts
+│   └── utils/                # 共通ロジック
+│
 ├── gen/                      # 生成されたProtobuf / Connectコード (Bufで管理)
 │   └── opti/
-│       └── v1/
-└── hooks/                    # カスタムReact Hooks
+│       └── ...
+│
+└── hooks/                    # Client Side Hooks
 ```
 
 ## 4. アーキテクチャパターン
