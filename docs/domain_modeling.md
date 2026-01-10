@@ -150,6 +150,7 @@ type BudgetConstraint = {
 type Product = {
   id: string;
   name: string;
+  description: string;
   manufacturer: string;
   strongPoint: string;
   weakPoint: string;
