@@ -1,0 +1,105 @@
+syntax = "proto3"; // プロトコルバッファのバージョン指定。現在はproto3が標準です。
+
+package catalog.v1; // パッケージ名。他のprotoファイルと区別するための名前空間です。v1を入れることでバージョン管理をしやすくします。
+
+// Goのコード生成先を指定します。
+// 後半の ;catalogv1 は、生成されたGoコード内でのパッケージ名を指定しています。
+option go_package = "github.com/kinoshitatakumi/opti/gen/go/catalog/v1;catalogv1";
+
+// ProductService: IoT家電製品のカタログ機能を提供するサービス定義です。
+// ここに定義したメソッドが、そのままAPIのエンドポイントになります。
+service ProductService {
+  // ListProducts: 利用可能な製品の一覧を取得します。
+  // 将来的にはフィルタリング機能などもここに追加されます。
+  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
+
+  // CreateProduct: カタログに新しい製品を追加します。
+  // Admin画面からの登録用途です。
+  rpc CreateProduct(CreateProductRequest) returns (Product);
+
+  // GetProduct: 指定されたIDの製品詳細を取得します。
+  // 製品詳細ページなどで使用されます。
+  rpc GetProduct(GetProductRequest) returns (Product);
+
+  // UpdateProduct: 既存の製品情報を更新します。
+  rpc UpdateProduct(UpdateProductRequest) returns (Product);
+
+  // DeleteProduct: 製品を削除します。
+  rpc DeleteProduct(DeleteProductRequest) returns (DeleteProductResponse);
+}
+
+// Product: 製品情報を表すメッセージ（データ構造）です。
+// ドメインモデルのProductエンティティとほぼ対応しますが、通信用に最適化されます。
+message Product {
+  string id = 1;          // 一意な識別子 (UUID)
+  string name = 2;        // 製品名
+  string description = 3; // 詳細説明
+  int32 price = 4;        // 価格 (日本円)
+  string manufacturer = 5; // メーカー名
+  string purchase_link = 6; // 購入ページへのURL
+  string image_url = 7;     // 製品画像のURL
+
+  // 分析・提案ロジックで使用するためのフィールド
+  repeated string weak_points = 8;        // 弱点・デメリット (repeatedは配列を表します)
+  repeated string strong_points = 9;      // 強み・メリット
+  string installation_difficulty = 10;    // 設置難易度 (例: "low", "medium", "high")
+  string category = 11;                   // 製品カテゴリ (例: "robot_vacuum", "smart_lock")
+}
+
+// GetProductRequest: ID指定で製品を取得するリクエスト
+message GetProductRequest {
+  string id = 1; // 取得したい製品のID
+}
+
+// ListProductsRequest: 一覧取得APIのリクエストパラメータ
+message ListProductsRequest {
+  int32 page_size = 1;   // 1ページあたりの取得件数 (ページネーション用)
+  string page_token = 2; // 次のページを取得するためのトークン
+  string category = 3;   // カテゴリフィルタ
+  // TODO: 将来的にカテゴリや価格帯でのフィルタリング条件をここに追加
+}
+
+// ListProductsResponse: 一覧取得APIのレスポンス
+message ListProductsResponse {
+  repeated Product products = 1; // 取得された製品のリスト
+  string next_page_token = 2;    // 次のページを取得するためのトークン (空なら最後のページ)
+}
+
+// CreateProductRequest: 作成時のリクエスト。IDはサーバー側で生成するため含みません。
+message CreateProductRequest {
+  string name = 1;
+  string description = 2;
+  int32 price = 3;
+  string manufacturer = 4;
+  string purchase_link = 5;
+  string image_url = 6;
+  repeated string weak_points = 7;
+  repeated string strong_points = 8;
+  string installation_difficulty = 9;
+  string category = 10;
+}
+
+// UpdateProductRequest: 更新時のリクエスト。対象を特定するためIDが必須です。
+message UpdateProductRequest {
+  string id = 1; // 更新対象のID
+  string name = 2;
+  string description = 3;
+  int32 price = 4;
+  string manufacturer = 5;
+  string purchase_link = 6;
+  string image_url = 7;
+  repeated string weak_points = 8;
+  repeated string strong_points = 9;
+  string installation_difficulty = 10;
+  string category = 11;
+}
+
+// DeleteProductRequest: 削除時はIDだけ指定します。
+message DeleteProductRequest {
+  string id = 1;
+}
+
+// DeleteProductResponse: 削除完了時は空のレスポンスを返します。
+// 必要に応じて削除されたIDなどを返すこともあります。
+message DeleteProductResponse {
+}
