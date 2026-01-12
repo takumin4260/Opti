@@ -3,4 +3,5 @@ go 1.24.1
 use (
 	./gen/go
 	./services/catalog
+	./services/user
 )

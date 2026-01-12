@@ -1,0 +1,96 @@
+syntax = "proto3";
+
+// パッケージ名はディレクトリ構成と一致させます
+package user.v1;
+
+// Goの出力先パッケージを指定
+option go_package = "github.com/kinoshitatakumi/opti/gen/go/user/v1;userv1";
+
+// -----------------------------------------------------------------------------
+// AuthService Definition
+// -----------------------------------------------------------------------------
+
+service AuthService {
+  // Signup: 新規アカウント作成
+  // email/passwordで登録し、認証トークンを返す
+  rpc Signup(SignupRequest) returns (AuthResponse);
+
+  // Login: ログイン
+  // email/passwordで認証し、認証トークンを返す
+  rpc Login(LoginRequest) returns (AuthResponse);
+}
+
+message SignupRequest {
+  string email = 1;
+  string password = 2;
+  // 初回登録時の名前などがあればここに追加
+  string name = 3;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message AuthResponse {
+  // 認証トークン (JWTなどを想定)
+  string access_token = 1;
+  // 有効期限 (秒)
+  int32 expires_in = 2;
+  // ユーザー情報も一緒に返すと便利
+  User user = 3;
+}
+
+// -----------------------------------------------------------------------------
+// UserService Definition
+// -----------------------------------------------------------------------------
+
+service UserService {
+  // GetUserContext: 自分のユーザーコンテキスト（住環境など）を取得
+  rpc GetUserContext(GetUserContextRequest) returns (UserContext);
+
+  // UpdateUserContext: ユーザーコンテキストを更新（診断結果の保存など）
+  rpc UpdateUserContext(UpdateUserContextRequest) returns (UserContext);
+}
+
+message User {
+  string id = 1;
+  string email = 2;
+  string name = 3;
+}
+
+message GetUserContextRequest {
+  // 認証ヘッダーからユーザーIDを取るため、基本空でも良いが
+  // 将来的な拡張のために userId を入れておくことも多い
+  string user_id = 1;
+}
+
+message UpdateUserContextRequest {
+  string user_id = 1;
+  UserContext context = 2;
+}
+
+// UserContext: ユーザーの診断コンテキスト情報
+message UserContext {
+  string id = 1;
+  string user_id = 2;
+
+  // 住環境情報
+  ResidenceInfo residence = 3;
+  
+  // 今後ここに追加していく:
+  // LifestyleInfo lifestyle = 4;
+  // BudgetInfo budget = 5;
+}
+
+// ResidenceInfo: 住環境の詳細
+message ResidenceInfo {
+  // 家の種類 (例: "mansion", "detached")
+  string type = 1; 
+  // 築年数
+  int32 age = 2;
+  // 間取り (例: "3LDK")
+  string layout = 3; 
+  // 所有形態 (例: "owned", "rented")
+  string ownership = 4; 
+}
